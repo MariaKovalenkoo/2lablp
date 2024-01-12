@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Generator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+
+        button {
+            font-size: 16px;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        #passwords {
+            font-size: 20px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Генератор паролей</h1>
+    <button onclick="generatePassword()">Сгенерировать</button> <br>
+
+    <label for="password-count">Количество:</label>
+    <input type="number" id="password-count" value="1" min="1" max="10">
+    <label>Буквы</label>
+    <input type="checkbox" id="symbols" checked>
+    <label>Цифры</label>
+    <input type="checkbox" id="numbers" checked>
+
+    <div id="passwords"></div>
+
+    <script>
+        function generatePassword() {
+            const symbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const numbers = "0123456789";
+
+            // Выбор символов для пароля
+            let charset = "";
+            if (document.getElementById("symbols").checked) {
+                charset += symbols;
+            }
+            if (document.getElementById("numbers").checked) {
+                charset += numbers;
+            }
+
+            const passwordLength = 12;
+            const passwordCount = document.getElementById("password-count").value;
+            let passwords = [];
+
+            // Генерация паролей
+            for (let j = 0; j < passwordCount; j++) {
+                let password = "";
+                for (let i = 0; i < passwordLength; i++) {
+                    const randomIndex = Math.floor(Math.random() * charset.length);
+                    password += charset[randomIndex];
+                }
+
+                passwords.push(password);
+            }
+
+            const passwordsList = document.getElementById('passwords');
+            for (let index = 0; index < passwords.length; index++) {
+                let pswrd = document.createElement('div');
+                pswrd.textContent = passwords[index];
+                pswrd.classList.add('clickable');
+                pswrd.addEventListener('click', () => {
+                    saveToFile(passwords[index]);
+                    console.log("Сохранено");
+                });
+                passwordsList.appendChild(pswrd);
+            }
+
+        }
+
+        function saveToFile(password) {
+            fetch('/save-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ password }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
